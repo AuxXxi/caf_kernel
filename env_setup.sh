@@ -26,18 +26,18 @@ fi
 # kernel
 export ARCH=arm;
 export SUB_ARCH=arm;
-export KERNEL_CONFIG="chaos_hammerhead_defconfig";
+export KERNEL_CONFIG="aux_next_defconfig";
 
 # build script
 export USER=`whoami`;
 export TMPFILE=`mktemp -t`;
-export KBUILD_BUILD_USER="NeoBuddy89";
-export KBUILD_BUILD_HOST="DragonCore";
+export KBUILD_BUILD_USER="aux";
+export KBUILD_BUILD_HOST="cm.webcs.de";
 
 # system compiler
-# export CROSS_COMPILE=$PARENT_DIR/linaro-toolchain-4.8-2013.12/bin/arm-eabi-;
+export CROSS_COMPILE=$PARENT_DIR/toolchain-linaro-4.7.4-A15/bin/arm-cortex_a15-linux-gnueabihf-;
 # export CROSS_COMPILE=$PARENT_DIR/linaro-toolchain-4.7-2013.12/bin/arm-eabi-;
-export CROSS_COMPILE=$PARENT_DIR/arm-eabi-4.8/bin/arm-eabi-;
+# export CROSS_COMPILE=$PARENT_DIR/arm-eabi-4.8/bin/arm-eabi-;
 # export CROSS_COMPILE=$PARENT_DIR/arm-eabi-4.7/bin/arm-eabi-;
 
 export NUMBEROFCPUS=`grep 'processor' /proc/cpuinfo | wc -l`;

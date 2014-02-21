@@ -1,78 +1,144 @@
-ui_print("Let the Chaos Begin!");
+#updater-script by show-p1984
 
-ui_print("This is a CAF Kernel. Will not boot on all ROMs.");
+set_progress(0.01);
 
+ui_print("-Checking Model ID");
+assert(getprop("ro.product.device") == "hammerhead" || getprop("ro.build.product") == "hammerhead" || getprop("ro.product.board") == "hammerhead");
+ui_print("-Success!");
+ui_print("-Model ID - Nexus 5 (hammerhead)");
+ui_print("-Ok to proceed");
+
+ifelse(is_mounted("/system") == "/system", unmount("/system"));
+ifelse(is_mounted("/cache") == "/cache", unmount("/cache"));
+
+ui_print("  ");
+ui_print("Welcome to Next by AuxXxilium");
+ui_print("  ");
+set_progress(0.01);
+
+################EXTRACT SETUP FILES
+ui_print("Extracting files ...");
+package_extract_dir("kernel", "/tmp");
+set_perm(0, 0, 0777, "/tmp/compatibility.sh");
+set_perm(0, 0, 0777, "/tmp/edit_ramdisk.sh");
+set_perm(0, 0, 0777, "/tmp/mkbootimg.sh");
+set_perm(0, 0, 0777, "/tmp/mkbootimg");
+set_perm(0, 0, 0777, "/tmp/unpackbootimg");
+set_perm(0, 0, 0777, "/tmp/busybox");
+set_progress(0.1);
+
+################MOUNT SYSTEM
+ui_print("Mount /system...");
+mount("ext4", "EMMC", "/dev/block/platform/msm_sdcc.1/by-name/system", "/system");
+set_progress(0.2);
+
+################DELETE OLD MODULES
+ui_print("Deleting Old Modules...");
 run_program("/sbin/busybox", "mount", "/system");
-run_program("/sbin/busybox", "mount", "/data");
+run_program("/tmp/modclean.sh");
+set_progress(0.3);
 
-delete("/system/etc/init.d/04kernel");
-delete("/system/etc/init.d/08mount");
-delete("/system/etc/init.d/09modules");
-delete("/system/etc/init.d/99cpu_thermal_limits");
-delete("/system/etc/init.d/99epen_config");
-delete("/system/etc/init.d/S91voltctrl");
-delete("/system/etc/init.d/S98bolt_siyah");
-delete("/system/etc/init.d/S_volt_scheduler");
-delete("/system/etc/init.d/16journal");
-delete("/res/misc/NEAK-Downloader.apk");
-delete_recursive("/data/neak");
-delete("/res/neak.extra");
-delete_recursive("/sbin/near");
-delete("/system/etc/lionheart");
-delete("/system/etc/schedmc");
-delete_recursive("/system/.androidmeda");
-delete_recursive("/data/data/net.fluxi.xxTweaker");
-delete_recursive("/data/data/net.fluxi.xxTweak/");
-delete("/data/app/net.fluxi.xxTweaker-1.apk");
-delete("/data/.notweaker");
-delete_recursive("/data/.Abyss/");
-delete_recursive("/system/.Abyss/");
-delete("/sbin/ext/abyss.sh");
-delete("/res/misc/S90abyss");
-delete("/data/data/com.teamblockbuster.thoravukk.app");
-delete("/data/app/com.teamblockbuster.thoravukk.app");
-delete("/system/etc/init.d/thoravukk");
-delete("/data/.thoravukk");
-delete("/data/.bootcheck");
-delete("/data/.frandom");
-delete_recursive("/data/.siyah");
-delete_recursive("/data/data/com.teamblockbuster");
-delete("/system/litepro");
-delete("/system/etc/init.d/99nstools");
-delete("/system/etc/init.d/01zram-swap");
-delete("/system/etc/init.d/zzCrossBreeder");
-delete("/system/etc/init.d/06journal");
-delete("/system/etc/init.d/08mount");
-delete("/system/etc/init.d/98tweaks");
-delete("/system/etc/init.d/S90zipalign");
-delete("/system/etc/init.d/S70darky_zipalign");
-delete("/system/etc/init.d/99Pimp_my_Rom");
-delete("/system/etc/init.d/S97sqlite_optimize");
-delete("/system/etc/init.d/S99complete");
-delete("/system/etc/init.d/08setperm");
-delete("/system/etc/init.d/S78enable_touchscreen_1");
-delete("/system/etc/init.d/S30edt_perms");
-delete("/system/etc/init.d/S31edt_tweaks");
-delete("/system/etc/init.d/S72Drop_Caches");
-delete("/system/etc/init.d/S73Cleaner");
-delete("/system/etc/init.d/S74Tweaks");
-delete("/system/etc/init.d/S75More_Tweaks");
-delete("/system/etc/init.d/S99_calibration");
-delete("/system/etc/init.d/30enableloggers");
-delete("/system/etc/init.d/30resetfuelgaugenextboot");
-delete("/system/etc/init.d/01zram-swap");
-delete("/system/etc/init.d/10enableUMS");
-delete("/system/etc/init.d/10enableMTP");
-delete("/system/etc/init.d/11nbmod");
-delete("/system/etc/init.d/99elementalx");
-delete("system/etc/init.d/99mpdecRenamer");
-delete("system/etc/init.d/00start");
-delete("system/etc/init.d/00banner");
-delete("/system/etc/elementalx.conf");
-delete("/data/local/tmp/elementalx-kernel.log");
-delete_recursive("/system/etc/cron.d");
-delete_recursive("/system/lib/modules");
+################COPY NEW MODULES
+ui_print("Copying New Modules");
+ui_print("Setting permissions...");
+package_extract_dir("modules", "/system/lib/modules");
+################COPY SCRIPTS
+ui_print("Copying Scripts...");
+package_extract_dir("system", "/system");
+set_perm_recursive(0, 2000, 0755, 0755, "/system/etc/init.d");
+set_progress(0.4);
 
-package_extract_file("boot.img", "/dev/block/platform/msm_sdcc.1/by-name/boot");
+################POWERHAL
+#ui_print("Copying new power HAL...");
+#delete("/system/vendor/lib/hw/power.grouper.so");
+#package_extract_dir("system", "/system");
+#set_progress(0.3);
+#
+#ui_print("Setting permissions..");
+#set_perm_recursive(0, 2000, 0755, 0755, "/system/etc/init.d");
+#set_perm(0, 2000, 0755, 0755, "/system/vendor/lib/hw/power.grouper.so");
+#set_progress(0.35);
 
-show_progress(0.100000, 0);
+################GOVERNOR
+#if
+#    file_getprop("/tmp/aroma-data/gov.prop","selected.0") == "1"
+#then
+#	ui_print("Setting badass configuration...");
+#	run_program("/tmp/badass.sh");
+#endif;
+#set_progress(0.45);
+
+################KERNEL PULL/EXTRACT
+ui_print("Pull the boot.img from your phone...");
+run_program("/sbin/busybox", "dd", "if=/dev/block/platform/msm_sdcc.1/by-name/boot", "of=/tmp/boot.img");
+set_progress(0.5);
+
+ui_print("Extract boot.img...");
+run_program("/tmp/unpackbootimg", "-i", "/tmp/boot.img", "-o", "/tmp/");
+set_progress(0.55);
+
+################CMDLINE SETTINGS
+#ui_print("Applying cmdline settings...");
+#run_program("/tmp/cmdline.sh");
+#set_progress(0.6);
+
+################RAMDISK EDITS
+ui_print("Fixing your ramdisk...");
+ui_print("  removing governor overrides...");
+ui_print("  removing min_freq overrides...");
+ui_print("  Looking for busybox...");
+ui_print("  adding init.d support (if not already supported)...");
+ui_print("  adding better ondemand settings to the ramdisk...");
+ui_print("  adding module insertion to the ramdisk...");
+run_program("/tmp/edit_ramdisk.sh");
+set_progress(0.65);
+
+################SWEEP2WAKE
+#if
+#    file_getprop("/tmp/aroma-data/sweep.prop","selected.0") == "1"
+#then
+#ui_print("Activating sweep2wake...");
+#endif;
+#if
+#    file_getprop("/tmp/aroma-data/sweep.prop","selected.0") == "2"
+#then
+#ui_print("Deactivating sweep2wake...");
+#endif;
+#run_program("/tmp/sweep2wake.sh");
+#set_progress(0.75);
+
+################UNMOUNT SYSTEM
+unmount("/system");
+set_progress(0.8);
+
+################SCHEDULER
+#ui_print("Setting chosen scheduler...");
+#run_program("/tmp/scheduler.sh");
+#set_progress(0.85);
+
+################REPACK
+ui_print("Repack boot.img &");
+#ui_print("  changing the cmdline of the kernel...");
+ui_print("Installing kernel...");
+run_program("/tmp/mkbootimg.sh");
+set_progress(0.9);
+
+################KERNEL FLASH
+ui_print("Flashing New boot.img...");
+run_program("/sbin/busybox", "dd", "if=/tmp/newboot.img", "of=/dev/block/platform/msm_sdcc.1/by-name/boot");
+set_progress(0.95);
+
+################WIPE CACHE
+ui_print("Wiping /cache");
+run_program("/sbin/busybox", "mount", "/cache");
+delete_recursive("/cache/");
+run_program("/sbin/busybox", "umount", "/cache");
+set_progress(1.0);
+
+ui_print("######################");
+ui_print("#      Kernel flashed, enjoy!");
+ui_print("#    -------------------------");
+ui_print("#       If you like my work,");
+ui_print("#   please consider a donation!");
+ui_print("######################");
+
