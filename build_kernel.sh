@@ -30,7 +30,7 @@ echo "0" > $TMPFILE;
 
 (
 
-	# check xml-config for "NXTweaks"-app
+	# check xml-config
 	XML2CHECK="${INITRAMFS_SOURCE}/res/customconfig/customconfig.xml";
 	xmllint --noout $XML2CHECK;
 	if [ $? == 1 ]; then
@@ -76,8 +76,7 @@ else
 fi;
 
 . $KERNELDIR/.config
-GETVER=`grep 'Chaos-Kernel_v.*' $KERNELDIR/.config | sed 's/.*_.//g' | sed 's/".*//g'`
-echo "${bldcya}Building => Chaos Kernel ${GETVER} ${txtrst}";
+echo "${bldcya}Building => Kernel";
 
 # remove previous zImage files
 if [ -e $KERNELDIR/zImage ]; then
@@ -119,36 +118,14 @@ if [ -e $KERNELDIR/arch/arm/boot/zImage ]; then
 	# copy all needed to out kernel folder
 	./utilities/mkbootimg --kernel zImage --ramdisk ramdisk.gz --cmdline "console=ttyHSL0,115200,n8 androidboot.hardware=hammerhead user_debug=31 msm_watchdog_v2.enable=1 androidboot.selinux=permissive" --base 0x00000000 --pagesize 2048 --ramdisk_offset 0x02900000 --tags_offset 0x02700000 --dt dt.img --output boot.img
 	rm $KERNELDIR/out/boot.img >> /dev/null;
-	rm $KERNELDIR/out/Chaos-Kernel_* >> /dev/null;
+	rm $KERNELDIR/out/aux-nexxxt-* >> /dev/null;
 	cp $KERNELDIR/boot.img /$KERNELDIR/out/
 	cd $KERNELDIR/out/
-	zip -r Chaos-Kernel_v${GETVER}-`date +"[%m-%d]-[%H-%M]"`.zip .
+	zip -r aux-nexxxt-`date +"[%m-%d]-[%H-%M]"`.zip .
 	echo "${bldcya}***** Ready to Roar *****${txtrst}";
 	# finished? get elapsed time
 	res2=$(date +%s.%N)
 	echo "${bldgrn}Total time elapsed: ${txtrst}${grn}$(echo "($res2 - $res1) / 60"|bc ) minutes ($(echo "$res2 - $res1"|bc ) seconds) ${txtrst}";	
-	while [ "$push_ok" != "y" ] && [ "$push_ok" != "n" ] && [ "$push_ok" != "Y" ] && [ "$push_ok" != "N" ]
-	do
-	      read -p "${bldblu}Do you want to push the kernel to the sdcard of your device?${txtrst}${blu} (y/n)${txtrst}" push_ok;
-		sleep 1;
-	done
-	if [ "$push_ok" == "y" ] || [ "$push_ok" == "Y" ]; then
-		STATUS=`adb get-state` >> /dev/null;
-		while [ "$ADB_STATUS" != "device" ]
-		do
-			sleep 1;
-			ADB_STATUS=`adb get-state` >> /dev/null;
-		done
-		adb push $KERNELDIR/out/Chaos-Kernel_v*.zip /sdcard/
-		while [ "$reboot_recovery" != "y" ] && [ "$reboot_recovery" != "n" ] && [ "$reboot_recovery" != "Y" ] && [ "$reboot_recovery" != "N" ]
-		do
-			read -p "${bldblu}Reboot to recovery?${txtrst}${blu} (y/n)${txtrst}" reboot_recovery;
-			sleep 1;
-		done
-		if [ "$reboot_recovery" == "y" ] || [ "$reboot_recovery" == "Y" ]; then
-			adb reboot recovery;
-		fi;
-	fi;
 	exit 0;
 else
 	echo "${bldred}Kernel STUCK in BUILD!${txtrst}"
